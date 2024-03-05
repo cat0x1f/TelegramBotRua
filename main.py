@@ -17,7 +17,8 @@ bot = AsyncTeleBot(token=str(sys.argv[1]), parse_mode="MARKDOWN")
 
 @bot.message_handler(commands=["jrrp"])
 async def send_jrrp(message):
-    reply = await jrrp_text_init(from_input_get_score(message.from_user.id))
+    score = await from_input_get_score(message.from_user.id)
+    reply = await jrrp_text_init(score)
     await bot.reply_to(message, reply)
 
 
