@@ -24,20 +24,27 @@ async def send_jrrp(message):
 
 @bot.message_handler(func=lambda message: True)
 async def repeat_repeat_repeat(message):
-    if message.text.endswith("!") or message.text.endswith("！"):
-        if len(message.text) < 30:
-            if "\n" in message.text:
-                reply = (
-                    re.sub(r"[!！]+", "！", message.text)
-                    + "\n"
-                    + re.sub(r"[!！]+", "！", message.text)
-                    + "\n"
-                    + re.sub(r"[!！]+", "！", message.text)
-                )
+    if not (message.text.endswith("!") or message.text.endswith("！")):
+        return
+    if len(message.text) >= 30:
+        return
 
-            else:
-                reply = re.sub(r"[!！]+", "！", message.text) * 3
-            await bot.reply_to(message, reply)
+    reply = re.sub(r"[!！]", "！", message.text)
+
+    if "\n" not in message.text:
+        reply *= 3
+        await bot.reply_to(message, reply)
+        return
+
+    reply = (
+        reply
+        + "\n"
+        + reply
+        + "\n"
+        + reply
+    )
+
+    await bot.reply_to(message, reply)
 
 
 async def jrrp_text_init(nub_in):
