@@ -1,21 +1,15 @@
 # 使用 python3 main.py yourtoken 来启动，比如 python3 main.py 114514:ABCDEFGO_HIJKLMNOxE
 from telebot.async_telebot import AsyncTeleBot
+from datetime import datetime, timedelta
 import asyncio
 import random
-from datetime import datetime, timedelta
 import sys
 import re
 
 JRRP_GOOD_DAYS = [
-    2024210,
-    202429,
-    202422,
     202467,
     202468,
     202469,
-    202567,
-    202568,
-    202569,
 ]
 
 bot = AsyncTeleBot(token=str(sys.argv[1]), parse_mode="MARKDOWN")
@@ -23,41 +17,48 @@ bot = AsyncTeleBot(token=str(sys.argv[1]), parse_mode="MARKDOWN")
 
 @bot.message_handler(commands=["jrrp"])
 async def send_jrrp(message):
-    score = await from_input_get_score(message.from_user.id)
-    reply = await jrrp_text_init(score)
+    reply = await jrrp_text_init(from_input_get_score(message.from_user.id))
     await bot.reply_to(message, reply)
 
 
 @bot.message_handler(func=lambda message: True)
 async def repeat_repeat_repeat(message):
-    print(message)
     if message.text.endswith("!") or message.text.endswith("！"):
         if len(message.text) < 30:
-            reply = re.sub(r"[!！]+", "！", message.text) * 3
-            print(reply)
+            if "\n" in message.text:
+                reply = (
+                    re.sub(r"[!！]+", "！", message.text)
+                    + "\n"
+                    + re.sub(r"[!！]+", "！", message.text)
+                    + "\n"
+                    + re.sub(r"[!！]+", "！", message.text)
+                )
+
+            else:
+                reply = re.sub(r"[!！]+", "！", message.text) * 3
             await bot.reply_to(message, reply)
 
 
-async def jrrp_text_init(nub_in):
-    nub = int(nub_in)
+async def jrrp_text_init(score):
+    nub = int(score)
     if nub == 100:
-        return "今天的人品是：" + str(nub_in) + "\n" + "100 人品好评!!!"
+        return "今天的人品是：" + str(score) + "\n" + "100 人品好评!!!"
     elif nub >= 90:
-        return "今天的人品是：" + str(nub_in) + "\n" + "今天的人品非常不错呢"
+        return "今天的人品是：" + str(score) + "\n" + "今天的人品非常不错呢"
     elif nub >= 70:
-        return "今天的人品是：" + str(nub_in) + "\n" + "哇,人品还挺好的!"
+        return "今天的人品是：" + str(score) + "\n" + "哇,人品还挺好的!"
     elif nub >= 60:
-        return "今天的人品是：" + str(nub_in) + "\n" + "今天是 非常¿ 不错的一天呢!"
+        return "今天的人品是：" + str(score) + "\n" + "今天是 非常¿ 不错的一天呢!"
     elif nub > 50:
-        return "今天的人品是：" + str(nub_in) + "\n" + "你的人品还不错呢"
+        return "今天的人品是：" + str(score) + "\n" + "你的人品还不错呢"
     elif nub == 50:
-        return "今天的人品是：" + str(nub_in) + "\n" + "五五开！"
+        return "今天的人品是：" + str(score) + "\n" + "五五开！"
     elif nub >= 40:
-        return "今天的人品是：" + str(nub_in) + "\n" + f"还好还好只有 {nub}"
+        return "今天的人品是：" + str(score) + "\n" + f"还好还好只有 {nub}"
     elif nub >= 20:
-        return "今天的人品是：" + str(nub_in) + "\n" + f"{nub} 这数字太....要命了"
+        return "今天的人品是：" + str(score) + "\n" + f"{nub} 这数字太....要命了"
     elif nub >= 0:
-        return "今天的人品是：" + str(nub_in) + "\n" + "抽大奖¿"
+        return "今天的人品是：" + str(score) + "\n" + "抽大奖¿"
 
 
 async def from_input_get_score(user_id):
