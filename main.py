@@ -10,6 +10,7 @@ JRRP_GOOD_DAYS = [
     202467,
     202468,
     202469,
+    2024610,
 ]
 
 bot = AsyncTeleBot(token=str(sys.argv[1]), parse_mode="MARKDOWN")
