@@ -2,9 +2,10 @@ FROM python:3.9-alpine
 
 WORKDIR /app
 
-RUN pip install --upgrade pip
-RUN pip install pyTelegramBotAPI telebot aiohttp
+COPY requirements.txt .
+
+RUN pip install --upgrade pip && pip install --no-cache-dir -r requirements.txt
 
 COPY . .
 
-CMD python main.py $BOTTOKEN
+CMD ["python", "main.py", "$BOTTOKEN"]
