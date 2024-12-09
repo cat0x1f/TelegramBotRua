@@ -1,4 +1,5 @@
 import re
+import commands.yes
 
 REPEAT_MAX_MESSAGE_LENGTH = 30
 
@@ -6,9 +7,10 @@ REPEAT_MAX_MESSAGE_LENGTH = 30
 def main(message) -> str:
     if message.text.endswith("!") or message.text.endswith("！"):
         return repeat(message)
-    if message.text.startswith("/"):
+    elif message.text.startswith("/"):
         return call(message)
-
+    else:
+        return chat(message)
 
 def repeat(message):
     if len(message.text) < REPEAT_MAX_MESSAGE_LENGTH:
@@ -40,4 +42,11 @@ def call(message):
         elif len(splited_message) == 1:
             return f"{sender_name}{splited_message[0]}了{reply_to_user_name}! "
 
-    
+
+def chat(message):
+    if len(message.text) <= 20:
+        return (
+            commands.yes.handle_is(message.text)
+            or commands.yes.handle_right(message.text)
+            or commands.yes.handle_can(message.text)
+        )
