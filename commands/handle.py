@@ -10,7 +10,8 @@ def main(message) -> str:
     elif message.text.startswith("/"):
         return call(message)
     else:
-        return chat(message)
+        return yes(message)
+
 
 def repeat(message):
     if len(message.text) < REPEAT_MAX_MESSAGE_LENGTH:
@@ -43,7 +44,7 @@ def call(message):
             return f"{sender_name}{splited_message[0]}了{reply_to_user_name}! "
 
 
-def chat(message):
+def yes(message):
     if len(message.text) <= 20:
         return (
             commands.yes.handle_is(message.text)
