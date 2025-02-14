@@ -1,7 +1,8 @@
 import re
 import commands.yes
 
-REPEAT_MAX_MESSAGE_LENGTH = 30
+REPEAT_MAX_MESSAGE_LENGTH = 50
+REPLY_YES_MAX_MESSAGE_LENGTH = 50
 
 
 def main(message) -> str:
@@ -45,7 +46,7 @@ def call(message):
 
 
 def yes(message):
-    if len(message.text) <= 20:
+    if len(message.text) <= REPLY_YES_MAX_MESSAGE_LENGTH:
         return (
             commands.yes.handle_is(message.text)
             or commands.yes.handle_right(message.text)
