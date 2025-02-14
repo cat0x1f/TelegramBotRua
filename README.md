@@ -4,13 +4,13 @@
 
 使用时需要关闭隐私模式。
 
-今日人品灵感创意于[此](https://github.com/GooGuJiang/Gugumoe-bot)。
+今日人品灵感创意于 [GooGuJiang/Gugumoe-bot](https://github.com/GooGuJiang/Gugumoe-bot)。
 
-重复重复重复创意来源于[此](https://github.com/rikumi/tietie-bot/blob/main/src/commands/repeat.ts)。
+重复重复重复创意来源于 [rikumi/tietie-bot](https://github.com/rikumi/tietie-bot/blob/main/src/commands/repeat.ts)。
 
-A 吃了 B 创意来源于[此](https://github.com/sxyazi/bendan/tree/master)。
+A 吃了 B 创意来源于 [sxyazi/bendan](https://github.com/sxyazi/bendan/tree/master)。
 
-人机回复创意与代码来源于[此](https://github.com/sxyazi/bendan/tree/master)。
+人机回复创意与代码来源于 [sxyazi/bendan](https://github.com/sxyazi/bendan/tree/master)。
 
 # 使用
 
