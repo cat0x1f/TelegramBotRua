@@ -1,21 +1,25 @@
 import re
 import commands.yes
 
-REPEAT_MAX_MESSAGE_LENGTH = 50
-REPLY_YES_MAX_MESSAGE_LENGTH = 50
+# TODO
+MAX_REPEAT_MESSAGE_LENGTH = 50
+MAX_YES_MESSAGE_LENGTH = 50
+MAX_CALL_MESSAGE_LENGTH = 50
 
 
 def main(message) -> str:
-    if message.text.endswith("!") or message.text.endswith("！"):
-        return repeat(message)
-    elif message.text.startswith("/"):
-        return call(message)
-    else:
+    if len(message.text) < MAX_REPEAT_MESSAGE_LENGTH:  # 重复
+        if message.text.endswith("!") or message.text.endswith("！"):
+            return repeat(message)
+    elif len(message.text) < MAX_CALL_MESSAGE_LENGTH:  # Call 回复
+        if message.text.startswith("/"):
+            return call(message)
+    elif len(message.text) < MAX_YES_MESSAGE_LENGTH:  # YES 回复
         return yes(message)
 
 
 def repeat(message):
-    if len(message.text) < REPEAT_MAX_MESSAGE_LENGTH:
+    if len(message.text) < MAX_REPEAT_MESSAGE_LENGTH:
         repeat_text = re.sub(r"[!！]+", "！", message.html_text)
         if "我" in repeat_text or "你" in repeat_text:
             translation_table = str.maketrans("你我", "我你")
@@ -46,9 +50,8 @@ def call(message):
 
 
 def yes(message):
-    if len(message.text) <= REPLY_YES_MAX_MESSAGE_LENGTH:
-        return (
-            commands.yes.handle_is(message.text)
-            or commands.yes.handle_right(message.text)
-            or commands.yes.handle_can(message.text)
-        )
+    return (
+        commands.yes.handle_is(message.text)
+        or commands.yes.handle_right(message.text)
+        or commands.yes.handle_can(message.text)
+    )

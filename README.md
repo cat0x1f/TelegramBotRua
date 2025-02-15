@@ -1,54 +1,18 @@
 # TelegramBotRua
 
-也许是多功能的？不确定。
-
 使用时需要关闭隐私模式。
 
-今日人品灵感创意于 [GooGuJiang/Gugumoe-bot](https://github.com/GooGuJiang/Gugumoe-bot)。
+感谢：
 
-重复重复重复创意来源于 [rikumi/tietie-bot](https://github.com/rikumi/tietie-bot/blob/main/src/commands/repeat.ts)。
+- [GooGuJiang/Gugumoe-bot](https://github.com/GooGuJiang/Gugumoe-bot)。
 
-A 吃了 B 创意来源于 [sxyazi/bendan](https://github.com/sxyazi/bendan/tree/master)。
+- [rikumi/tietie-bot](https://github.com/rikumi/tietie-bot/)。
 
-人机回复创意与代码来源于 [sxyazi/bendan](https://github.com/sxyazi/bendan/tree/master)。
+- [sxyazi/bendan](https://github.com/sxyazi/bendan/)。
 
-# 使用
-
-`<Your Token Here>` 为从 @BotFather 获取的令牌。
-
-## 不使用 Docker
-
-### 依赖
+## 环境变量
 
 ```bash
-pip install -r requirements.txt
-```
-
-### 运行
-
-注意，在同时使用环境变量和命令行传参的情况下，命令行传参的优先级高于环境变量。
-
-#### 直接传参
-```bash
-python3 main.py <Your Token Here>
-```
-
-#### 使用环境变量
-```bash
-export BOTTOKEN='<Your Token Here>'
-python3 main.py
-```
-
-## 使用 Docker
-
-### 拉取
-
-```bash
-docker pull ghcr.io/cat0x1f/telegrambotrua:main
-```
-
-### 运行
-
-```bash
-docker run --env BOTTOKEN=<Your Token Here> ghcr.io/cat0x1f/telegrambotrua:main
+export BOT_TOKEN=1145141919:imagreencatfoxfurry
+export ALLOW_GROUPS=-1145141919
 ```
