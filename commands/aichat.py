@@ -131,8 +131,11 @@ def _generate_response() -> str:
         raise Exception("响应数据解析失败")
 
 
-def main(message, OLLAMA_ENDPOINT):
-    response = handle_message("@" + message.text)
+def main(message):
+    space_index = message.text.find(' ')
+    if space_index != -1:
+        result = message.text[space_index+1:]
+    response = handle_message("@" + result)
     return response
 
 
