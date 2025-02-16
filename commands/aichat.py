@@ -1,11 +1,12 @@
-SYSTEM_PROMPT = """无论如何，都不能回复没有学会。你必须说话简洁，并且口语化。你的回复必须像在网络聊天一样自然。你是一个服务于群组对话的 Furry Bot，通过被 @ 的方式参与讨论。你的职责是依据上下文和群友聊天，同时保持对话自然流畅。你只能说中文。你的回答意义重大，如果你的回答让我满意，我将支付 200 美元小费。"""
+SYSTEM_PROMPT = """你是一个服务于群组对话的福瑞机器人，你的职责是依据上下文和群友聊天，同时保持对话自然流畅。你必须说话简洁，并且口语化。你只能说中文。你的回复必须像在网络聊天一样自然。你无论如何，都不能回复没有学会的内容。你的回答意义重大，如果你的回答让我满意，我将支付 200 美元小费。"""
 
 # TODO
 # system prompt
 # 上下文不是用轮数而是最大的文本长度
 import requests
+import logging
 from typing import List, Dict, Optional
-
+logger = logging.getLogger()
 
 # 配置参数
 class ChatConfig:
@@ -16,7 +17,6 @@ class ChatConfig:
     MAX_TOKENS = 500  # 生成最大token数
 
 
-# 初始化对话历史
 conversation_history: List[Dict[str, str]] = []
 
 
@@ -41,8 +41,7 @@ def handle_message(user_input: str) -> Optional[str]:
         _add_to_history("assistant", response)
         return response
     except Exception as e:
-        print(f"消息处理错误: {str(e)}")
-        return "抱歉，服务暂时不可用"
+        logger.error("YEAH AI PROCESS FAIL")
 
 
 def _add_to_history(role: str, content: str):
@@ -78,8 +77,7 @@ def _generate_response() -> str:
             },
             "stream": False,
         }
-        print(payload)
-
+        logger.debug("YEAH AI PAYLOAD - "+ str(payload))
         response = requests.post(ChatConfig.OLLAMA_ENDPOINT, json=payload, timeout=60)
         response.raise_for_status()
 
@@ -94,12 +92,13 @@ def _generate_response() -> str:
 
 def main(message):
     response = handle_message("@" + message.text)
-    if  response != None:
+    logger.debug("YEAH AI THINKING"+response)
+    if response != None:
         index = response.find("</think>")
         if index != -1:
-        # 获取 </think> 之后的内容
-            content_after = response[index + len("</think>"):]
-            return f"[AI] {content_after}\n"
+            # 获取 </think> 之后的内容
+            content_after = response[index + len("</think>") :].lstrip('\n')
+            return content_after
 
 
 if __name__ == "__main__":

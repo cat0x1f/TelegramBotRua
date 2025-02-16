@@ -1,37 +1,35 @@
 import re
+import logging
 import commands.aichat
 import commands.yes
 
 # TODO
-MAX_REPEAT_MESSAGE_LENGTH = 50
-MAX_YES_MESSAGE_LENGTH = 20
-MAX_CALL_MESSAGE_LENGTH = 50
-MAX_AI_CHAT_MESSAGE_LENGTH = 50
+MAX_REPEAT_MESSAGE_LENGTH = 30
+MAX_YES_MESSAGE_LENGTH = 30
+MAX_CALL_MESSAGE_LENGTH = 30
+MAX_AI_CHAT_MESSAGE_LENGTH = 30
 
 
-# def main(message) -> str:
-#     if len(message.text) < MAX_REPEAT_MESSAGE_LENGTH:  # 重复
-#         if message.text.endswith("!") or message.text.endswith("！"):
-#             return repeat(message)
-#     elif len(message.text) < MAX_CALL_MESSAGE_LENGTH:  # Call 回复
-#         if message.text.startswith("/"):
-#             return call(message)
-#     elif len(message.text) < MAX_AI_CHAT_MESSAGE_LENGTH:  # TODO 被 at 后回复
-#         if "@cat0x1f_bot" in message.text:
-#             return commands.aichat.main(message)
-#     elif len(message.text) < MAX_YES_MESSAGE_LENGTH:  # YES 回复
-#         return yes(message)
+logger = logging.getLogger()
 
 
 def main(message) -> str:
-    if message.text.endswith("!") or message.text.endswith("！"):
-        return repeat(message)
-    elif message.text.startswith("/"):
-        return call(message)
-    elif "@cat0x1f_bot" in message.text:
-        return commands.aichat.main(message)
-    elif len(message.text) < MAX_YES_MESSAGE_LENGTH:  # YES 回复
-        return yes(message)
+    if (
+        message.text.endswith("!")
+        or message.text.endswith("！")
+        and len(message.text) < MAX_REPEAT_MESSAGE_LENGTH
+    ):
+        response = repeat(message)
+        logger.debug("OH REPEAT - " + response)
+        return response
+    elif message.text.startswith("/") and len(message.text) < MAX_CALL_MESSAGE_LENGTH:
+        response = call(message)
+        logger.debug("OH CALL - " + response)
+        return response
+    elif len(message.text) < MAX_YES_MESSAGE_LENGTH:
+        response = yes(message)
+        logger.debug("OH YES - " + response)
+        return response
 
 
 def repeat(message):
@@ -44,12 +42,11 @@ def repeat(message):
             repeat_text = repeat_text + "\n" + repeat_text + "\n" + repeat_text
         else:
             repeat_text *= 3
-
         return repeat_text
 
 
 def call(message):
-    splited_message = message.text.lstrip("/").split()  # 做的事
+    splited_message = message.text.lstrip("/").split()
     if len(splited_message) <= 2:
         sender_name = message.from_user.full_name  # 发送的人
         if message.reply_to_message != None:
@@ -58,7 +55,6 @@ def call(message):
             )  # 回复的人
         else:
             reply_to_user_name = "自己"
-
         if len(splited_message) == 2:
             return f"{sender_name}{splited_message[0]}了{reply_to_user_name}{splited_message[1]}! "
         elif len(splited_message) == 1:

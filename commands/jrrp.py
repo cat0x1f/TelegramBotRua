@@ -19,7 +19,7 @@ def main(user_id: int) -> str:
     elif score >= 40:
         return f"今天的人品是: {score}\n还好还好有 {score}😐"
     elif score >= 20:
-        return f"今天的人品是: {score}\n{score} 这数字太...要命了💀"
+        return f"今天的人品是: {score}\n{score} 这数字太...要命了😢"
     elif score >= 0:
         return f"今天的人品是: {score}\n抽大奖¿🎁"
 
@@ -28,8 +28,6 @@ def from_input_get_score(user_id: int) -> int:
     today_date = (datetime.now(timezone.utc) + timedelta(hours=8)).strftime("%Y%m%d")
     random.seed(int(today_date) + int(user_id))
     score = random.randint(0, 100)
-
-    # 给那些运气烂的家伙
     if score < 30:
         score += random.randint(15, 30)
     return score

@@ -49,7 +49,7 @@ class Token:
             return f"sub={self.sub}, obj={self.obj}"
         return f"sub={self.sub}, obj={self.obj}, ind={self.ind}"
 
-    
+
 def explode(s):
     ps = re_clause.findall(s)
     for i in range(len(ps) - 1, 0, -1):
