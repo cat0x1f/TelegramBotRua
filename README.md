@@ -13,6 +13,9 @@
 ## 环境变量
 
 ```bash
-export BOT_TOKEN=1145141919:imagreencatfoxfurry
-export ALLOW_GROUPS=-1145141919
+export BOT_TOKEN=7816288053:AAGGmCm17YsPTHSYM5WOoHcV9akHOW0xyEM
+export ALLOW_GROUPS=-1001852815669,-1268145665910
+export OLLAMA_MODEL=deepseek-r1:1.5b
+export OLLAMA_ENDPOINT=http://10.8.2.18:11434/api/chat
+export LOG_LEVEL=INFO
 ```

@@ -7,10 +7,24 @@ import commands.handle
 import commands.aichat
 
 BOT_TOKEN = os.getenv("BOT_TOKEN")
+OLLAMA_ENDPOINT = os.getenv("OLLAMA_ENDPOINT")
+OLLAMA_MODEL = os.getenv("OLLAMA_MODEL")
+LOG_LEVEL = os.getenv("LOG_LEVEL", "INFO").upper()
+ALLOWED_GROUPS = set(os.getenv("ALLOWED_GROUPS", "-1145141919810").split(","))
+
+log_levels = {
+    "DEBUG": logging.DEBUG,
+    "INFO": logging.INFO,
+    "WARNING": logging.WARNING,
+    "ERROR": logging.ERROR,
+    "CRITICAL": logging.CRITICAL,
+}
+level = log_levels.get(LOG_LEVEL, logging.INFO)
+
 logging.basicConfig(
     format="%(asctime)s - %(levelname)s: %(message)s",
     datefmt="%Y-%m-%d %H:%M:%S",
-    level=logging.INFO,
+    level=level,
 )
 logger = logging.getLogger()
 
@@ -18,9 +32,9 @@ if not BOT_TOKEN:
     logger.error("No BOT_TOKEN")
     exit(1)
 
-ALLOWED_GROUPS = set(os.getenv("ALLOWED_GROUPS", "-1145141919810").split(","))
-
 bot = telebot.TeleBot(token=BOT_TOKEN, parse_mode="HTML")
+commands.aichat.ChatConfig.OLLAMA_MODEL = OLLAMA_MODEL
+commands.aichat.ChatConfig.OLLAMA_ENDPOINT = OLLAMA_ENDPOINT
 
 
 def is_allowed_group(chat_id: int) -> bool:
