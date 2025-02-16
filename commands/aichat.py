@@ -11,7 +11,7 @@ class ChatConfig:
     OLLAMA_MODEL = "deepseek-r1:1.5b"
     CONTEXT_WINDOW = 8192  # 模型上下文窗口大小
     MAX_RESPONSE_TOKENS = 500  # 生成回复的最大 token 数
-    TEMPERATURE = 0.7
+    TEMPERATURE = 0.8
     TOKEN_BUFFER = 200  # 上下文 token 余量
 
 
@@ -81,8 +81,7 @@ def _process_response(raw_response: str) -> str:
         # 兼容无思考标签的情况
         final_response = raw_response
 
-    # 二次清理（可选）
-    return final_response.split("</任何可能的结束标签>")[0].strip()
+    return final_response
 
 
 def handle_message(user_input: str):
@@ -106,9 +105,9 @@ def handle_message(user_input: str):
 
 def _generate_response() -> str:
     try:
-        # 构建完整上下文
+        # Avoid adding a system prompt; all instructions should be contained within the user prompt.
         messages = [
-            {"role": "system", "content": SYSTEM_PROMPT}
+            {"role": "user", "content": SYSTEM_PROMPT}
         ] + conversation_history.get_messages()
 
         payload = {
@@ -126,15 +125,15 @@ def _generate_response() -> str:
 
         return response.json()["message"]["content"].strip()
     except requests.exceptions.RequestException as e:
-        raise Exception(f"API 请求失败: {str(e)}")
+        raise Exception(f"Bad API Request: {str(e)}")
     except KeyError:
-        raise Exception("响应数据解析失败")
+        raise Exception("Bad API Response Parse")
 
 
 def main(message):
-    space_index = message.text.find(' ')
+    space_index = message.text.find(" ")
     if space_index != -1:
-        result = message.text[space_index+1:]
+        result = message.text[space_index + 1 :]
     response = handle_message("@" + result)
     return response
 

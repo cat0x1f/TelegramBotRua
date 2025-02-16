@@ -6,7 +6,6 @@ import commands.yes
 MAX_REPEAT_MESSAGE_LENGTH = 30
 MAX_YES_MESSAGE_LENGTH = 30
 MAX_CALL_MESSAGE_LENGTH = 30
-MAX_AI_CHAT_MESSAGE_LENGTH = 30
 
 logger = logging.getLogger()
 

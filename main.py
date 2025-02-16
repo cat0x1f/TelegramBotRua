@@ -12,6 +12,8 @@ OLLAMA_MODEL = os.getenv("OLLAMA_MODEL")
 LOG_LEVEL = os.getenv("LOG_LEVEL", "INFO").upper()
 ALLOWED_GROUPS = set(os.getenv("ALLOWED_GROUPS", "-1145141919810").split(","))
 
+MAX_AI_CHAT_MESSAGE_LENGTH = 100
+
 log_levels = {
     "DEBUG": logging.DEBUG,
     "INFO": logging.INFO,
@@ -49,11 +51,9 @@ def command_jrrp(message) -> None:
 
 @bot.message_handler(commands=["chat"])
 def command_chat(message) -> None:
-    if is_allowed_group(message.chat.id):
-        logger.debug(f"YEAH AI INPUT - {message.text}")
-        response = commands.aichat.main(message)
-        logger.debug(f"YEAH AI OUTPUT - {response}")
-        bot.reply_to(message, response)
+    if is_allowed_group(message.chat.id) and len(message.text) < MAX_AI_CHAT_MESSAGE_LENGTH:
+        if response := commands.aichat.main(message):
+            bot.reply_to(message, response)
 
 
 @bot.message_handler(func=lambda message: True)
