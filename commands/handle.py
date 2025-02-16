@@ -3,67 +3,64 @@ import logging
 import commands.aichat
 import commands.yes
 
-# TODO
 MAX_REPEAT_MESSAGE_LENGTH = 30
 MAX_YES_MESSAGE_LENGTH = 30
 MAX_CALL_MESSAGE_LENGTH = 30
 MAX_AI_CHAT_MESSAGE_LENGTH = 30
 
-
 logger = logging.getLogger()
 
 
 def main(message) -> str:
+    message_length = len(message.text)
+
     if (
-        message.text.endswith("!")
-        or message.text.endswith("！")
-        and len(message.text) < MAX_REPEAT_MESSAGE_LENGTH
+        message.text.endswith(("!", "！"))
+        and message_length < MAX_REPEAT_MESSAGE_LENGTH
     ):
-        response = repeat(message)
-        logger.debug("OH REPEAT - " + response)
-        return response
-    elif message.text.startswith("/") and len(message.text) < MAX_CALL_MESSAGE_LENGTH:
-        response = call(message)
-        logger.debug("OH CALL - " + response)
-        return response
-    elif len(message.text) < MAX_YES_MESSAGE_LENGTH:
-        response = yes(message)
-        logger.debug("OH YES - " + response)
-        return response
+        return repeat(message)
+
+    elif message.text.startswith("/") and message_length < MAX_CALL_MESSAGE_LENGTH:
+        return call(message)
+
+    elif message_length < MAX_YES_MESSAGE_LENGTH:
+        return yes(message)
 
 
-def repeat(message):
-    if len(message.text) < MAX_REPEAT_MESSAGE_LENGTH:
-        repeat_text = re.sub(r"[!！]+", "！", message.html_text)
-        if "我" in repeat_text or "你" in repeat_text:
-            translation_table = str.maketrans("你我", "我你")
-            repeat_text = repeat_text.translate(translation_table)
-        if "\n" in message.text:
-            repeat_text = repeat_text + "\n" + repeat_text + "\n" + repeat_text
-        else:
-            repeat_text *= 3
-        return repeat_text
+def repeat(message) -> str:
+    repeat_text = re.sub(r"[!！]+", "！", message.html_text)
+
+    if "我" in repeat_text or "你" in repeat_text:
+        repeat_text = repeat_text.translate(str.maketrans("你我", "我你"))
+
+    if "\n" in message.text:
+        repeat_text = f"{repeat_text}\n{repeat_text}\n{repeat_text}"
+    else:
+        repeat_text *= 3
+
+    logger.debug(f"OH REPEAT - {repeat_text}")
+    return repeat_text
 
 
-def call(message):
+def call(message) -> str:
     splited_message = message.text.lstrip("/").split()
-    if len(splited_message) <= 2:
-        sender_name = message.from_user.full_name  # 发送的人
-        if message.reply_to_message != None:
-            reply_to_user_name = (
-                message.reply_to_message.from_user.full_name
-            )  # 回复的人
-        else:
-            reply_to_user_name = "自己"
-        if len(splited_message) == 2:
-            return f"{sender_name}{splited_message[0]}了{reply_to_user_name}{splited_message[1]}! "
-        elif len(splited_message) == 1:
-            return f"{sender_name}{splited_message[0]}了{reply_to_user_name}! "
+    sender_name = message.from_user.full_name
+    reply_to_user_name = message.reply_to_message.from_user.full_name
+
+    if len(splited_message) == 2:
+        response = f"{sender_name}{splited_message[0]}了{reply_to_user_name}{splited_message[1]}!"
+    elif len(splited_message) == 1:
+        response = f"{sender_name}{splited_message[0]}了{reply_to_user_name}!"
+
+    logger.debug(f"OH CALL - {response}")
+    return response
 
 
 def yes(message):
-    return (
+    response = (
         commands.yes.handle_is(message.text)
         or commands.yes.handle_right(message.text)
         or commands.yes.handle_can(message.text)
     )
+    logger.debug(f"OH YES - {response}")
+    return response

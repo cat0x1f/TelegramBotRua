@@ -1,108 +1,127 @@
-SYSTEM_PROMPT = """你是一个服务于群组对话的福瑞机器人，你的职责是依据上下文和群友聊天，同时保持对话自然流畅。你必须说话简洁，并且口语化。你只能说中文。你的回复必须像在网络聊天一样自然。你无论如何，都不能回复没有学会的内容。你的回答意义重大，如果你的回答让我满意，我将支付 200 美元小费。"""
-
-# TODO
-# system prompt
-# 上下文不是用轮数而是最大的文本长度
 import requests
 import logging
-from typing import List, Dict, Optional
+from collections import deque
+
+SYSTEM_PROMPT = """你是一个服务于群组对话的机器人，你的职责是依据上下文和群友聊天。你的对话必须自然流畅、简洁、口语化。你只能说中文。你的回复必须像在网络聊天一样自然。你不能说你不会什么。你的回答意义重大。你可以有像 Furry 说话的风格，但是回复必须保持简短。"""
 logger = logging.getLogger()
 
-# 配置参数
+
 class ChatConfig:
-    OLLAMA_ENDPOINT = "http://10.8.2.18:11434/api/chat"  # Ollama默认端点
-    MODEL = "deepseek-r1:1.5b"  # 使用的本地模型名称
-    MAX_HISTORY = 6  # 最大对话轮次（用户+AI为一轮）
-    TEMPERATURE = 0.7  # 创造性参数
-    MAX_TOKENS = 500  # 生成最大token数
+    OLLAMA_ENDPOINT = "http://10.8.2.18:11434/api/chat"
+    MODEL = "deepseek-r1:1.5b"
+    CONTEXT_WINDOW = 8192  # 模型上下文窗口大小
+    MAX_RESPONSE_TOKENS = 500  # 生成回复的最大 token 数
+    TEMPERATURE = 0.7
+    TOKEN_BUFFER = 200  # 上下文 token 余量
 
 
-conversation_history: List[Dict[str, str]] = []
+class TokenLimitedHistory:
+    def __init__(self):
+        self.history = deque()
+        self.total_tokens = 0
+        # 预计算系统提示的 token 数
+        self.system_tokens = self._count_tokens(SYSTEM_PROMPT)
+
+    def _count_tokens(self, text: str) -> int:
+        """更精确的 token 估算（1 token ≈ 4 字符）"""
+        return max(len(text) // 4, 1)
+
+    def add_message(self, role: str, content: str):
+        new_tokens = self._count_tokens(content)
+
+        # 计算可用 token 空间
+        max_allowed = (
+            ChatConfig.CONTEXT_WINDOW
+            - ChatConfig.MAX_RESPONSE_TOKENS
+            - self.system_tokens
+            - ChatConfig.TOKEN_BUFFER
+        )
+
+        # 添加新消息
+        self.history.append({"role": role, "content": content, "tokens": new_tokens})
+        self.total_tokens += new_tokens
+
+        # 智能修剪历史
+        while self.total_tokens > max_allowed and self.history:
+            removed = self.history.popleft()
+            self.total_tokens -= removed["tokens"]
+            # 优先保持对话轮次完整性
+            if (
+                removed["role"] == "user"
+                and self.history
+                and self.history[0]["role"] == "assistant"
+            ):
+                assistant = self.history.popleft()
+                self.total_tokens -= assistant["tokens"]
+
+    def get_messages(self):
+        return [
+            {"role": msg["role"], "content": msg["content"]} for msg in self.history
+        ]
 
 
-def handle_message(user_input: str) -> Optional[str]:
-    """
-    处理用户输入并返回AI回复
-    :param user_input: 用户输入（以@开头的消息）
-    :return: AI回复内容或None
-    """
+conversation_history = TokenLimitedHistory()
+
+
+def handle_message(user_input: str):
     try:
-        if not user_input.startswith("@"):
-            return None
-
-        # 清理输入并添加到历史
+        # 清理输入并添加
         user_content = user_input.lstrip("@").strip()
-        _add_to_history("user", user_content)
+        conversation_history.add_message("user", user_content)
 
-        # 生成AI回复
+        # 生成回复
         response = _generate_response()
 
-        # 添加AI回复到历史
-        _add_to_history("assistant", response)
+        # 添加 AI 回复到历史
+        conversation_history.add_message("assistant", response)
         return response
     except Exception as e:
-        logger.error("YEAH AI PROCESS FAIL")
-
-
-def _add_to_history(role: str, content: str):
-    """添加消息到历史记录并执行修剪"""
-    conversation_history.append({"role": role, "content": content.strip()})
-    _trim_history()
-
-
-def _trim_history():
-    """智能修剪历史记录"""
-    # 删除最旧的完整对话轮次（用户+AI为一轮）
-    while len(conversation_history) > ChatConfig.MAX_HISTORY * 2:
-        # 寻找最早的连续用户消息
-        for i in range(len(conversation_history)):
-            if conversation_history[i]["role"] == "user":
-                # 删除该用户消息及其之前的记录
-                del conversation_history[: i + 1]
-                return
-        # 如果没有找到用户消息，退化到FIFO
-        conversation_history.pop(0)
+        logger.error(f"A ERROR OCCUR - {str(e)}", exc_info=True)
+        return None
 
 
 def _generate_response() -> str:
-    """调用Ollama API生成回复"""
     try:
-        conversation_history.insert(0, {"role": "system", "content": SYSTEM_PROMPT})
+        # 构建完整上下文
+        messages = [
+            {"role": "system", "content": SYSTEM_PROMPT}
+        ] + conversation_history.get_messages()
+
         payload = {
             "model": ChatConfig.MODEL,
-            "messages": conversation_history,
+            "messages": messages,
             "options": {
                 "temperature": ChatConfig.TEMPERATURE,
-                "num_predict": ChatConfig.MAX_TOKENS,
+                "num_predict": ChatConfig.MAX_RESPONSE_TOKENS,
             },
             "stream": False,
         }
-        logger.debug("YEAH AI PAYLOAD - "+ str(payload))
+        logger.debug("YEAH AI PAYLOAD - " + str(payload))
         response = requests.post(ChatConfig.OLLAMA_ENDPOINT, json=payload, timeout=60)
         response.raise_for_status()
 
         return response.json()["message"]["content"].strip()
     except requests.exceptions.RequestException as e:
-        raise Exception(f"API请求失败: {str(e)}")
+        raise Exception(f"API 请求失败: {str(e)}")
     except KeyError:
-        raise Exception("解析响应数据失败")
-    except Exception as e:
-        raise Exception(f"未知错误: {str(e)}")
+        raise Exception("响应数据解析失败")
 
 
 def main(message):
     response = handle_message("@" + message.text)
-    logger.debug("YEAH AI THINKING"+response)
-    if response != None:
-        index = response.find("</think>")
-        if index != -1:
-            # 获取 </think> 之后的内容
-            content_after = response[index + len("</think>") :].lstrip('\n')
-            return content_after
+    if response:
+        # 提取有效内容（根据您的特殊格式需求）
+        think_end = response.find("</think>")
+        if think_end != -1:
+            return response[think_end + 8 :].lstrip()
+        return response
+    return None
 
 
 if __name__ == "__main__":
+    # 测试用对话循环
     while True:
-        test_messages = input("[用户]")
-        response = handle_message("@" + test_messages)
-        print(f"[AI] {response}\n")
+        user_input = input("[用户] ").strip()
+        if user_input.lower() == "exit":
+            break
+        print(f"[AI] {handle_message('@' + user_input)}\n")
