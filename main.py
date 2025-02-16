@@ -1,5 +1,4 @@
 import telebot
-import sys
 import os
 
 import commands.jrrp

@@ -1,19 +1,35 @@
 import re
+import commands.aichat
 import commands.yes
 
 # TODO
 MAX_REPEAT_MESSAGE_LENGTH = 50
-MAX_YES_MESSAGE_LENGTH = 50
+MAX_YES_MESSAGE_LENGTH = 20
 MAX_CALL_MESSAGE_LENGTH = 50
+MAX_AI_CHAT_MESSAGE_LENGTH = 50
+
+
+# def main(message) -> str:
+#     if len(message.text) < MAX_REPEAT_MESSAGE_LENGTH:  # 重复
+#         if message.text.endswith("!") or message.text.endswith("！"):
+#             return repeat(message)
+#     elif len(message.text) < MAX_CALL_MESSAGE_LENGTH:  # Call 回复
+#         if message.text.startswith("/"):
+#             return call(message)
+#     elif len(message.text) < MAX_AI_CHAT_MESSAGE_LENGTH:  # TODO 被 at 后回复
+#         if "@cat0x1f_bot" in message.text:
+#             return commands.aichat.main(message)
+#     elif len(message.text) < MAX_YES_MESSAGE_LENGTH:  # YES 回复
+#         return yes(message)
 
 
 def main(message) -> str:
-    if len(message.text) < MAX_REPEAT_MESSAGE_LENGTH:  # 重复
-        if message.text.endswith("!") or message.text.endswith("！"):
-            return repeat(message)
-    elif len(message.text) < MAX_CALL_MESSAGE_LENGTH:  # Call 回复
-        if message.text.startswith("/"):
-            return call(message)
+    if message.text.endswith("!") or message.text.endswith("！"):
+        return repeat(message)
+    elif message.text.startswith("/"):
+        return call(message)
+    elif "@cat0x1f_bot" in message.text:
+        return commands.aichat.main(message)
     elif len(message.text) < MAX_YES_MESSAGE_LENGTH:  # YES 回复
         return yes(message)
 
