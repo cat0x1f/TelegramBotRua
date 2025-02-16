@@ -1,6 +1,5 @@
 import re
 import logging
-import commands.aichat
 import commands.yes
 
 MAX_REPEAT_MESSAGE_LENGTH = 30

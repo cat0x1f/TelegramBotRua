@@ -4,11 +4,8 @@ import telebot
 import logging
 import commands.jrrp
 import commands.handle
-import commands.aichat
 
 BOT_TOKEN = os.getenv("BOT_TOKEN")
-OLLAMA_ENDPOINT = os.getenv("OLLAMA_ENDPOINT")
-OLLAMA_MODEL = os.getenv("OLLAMA_MODEL")
 LOG_LEVEL = os.getenv("LOG_LEVEL", "INFO").upper()
 ALLOWED_GROUPS = set(os.getenv("ALLOWED_GROUPS", "-1145141919810").split(","))
 
@@ -35,8 +32,6 @@ if not BOT_TOKEN:
     exit(1)
 
 bot = telebot.TeleBot(token=BOT_TOKEN, parse_mode="HTML")
-commands.aichat.ChatConfig.OLLAMA_MODEL = OLLAMA_MODEL
-commands.aichat.ChatConfig.OLLAMA_ENDPOINT = OLLAMA_ENDPOINT
 
 
 def is_allowed_group(chat_id: int) -> bool:
@@ -47,13 +42,6 @@ def is_allowed_group(chat_id: int) -> bool:
 def command_jrrp(message) -> None:
     if is_allowed_group(message.chat.id):
         bot.reply_to(message, commands.jrrp.main(message.from_user.id))
-
-
-@bot.message_handler(commands=["chat"])
-def command_chat(message) -> None:
-    if is_allowed_group(message.chat.id) and len(message.text) < MAX_AI_CHAT_MESSAGE_LENGTH:
-        if response := commands.aichat.main(message):
-            bot.reply_to(message, response)
 
 
 @bot.message_handler(func=lambda message: True)
