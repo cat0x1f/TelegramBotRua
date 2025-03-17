@@ -1,9 +1,9 @@
 import re
 import logging
-import commands.yes
+# import commands.yes
 
 MAX_REPEAT_MESSAGE_LENGTH = 30
-MAX_YES_MESSAGE_LENGTH = 30
+# MAX_YES_MESSAGE_LENGTH = 30
 MAX_CALL_MESSAGE_LENGTH = 30
 
 logger = logging.getLogger()
@@ -21,8 +21,8 @@ def main(message) -> str:
     elif message.text.startswith("/") and message_length < MAX_CALL_MESSAGE_LENGTH:
         return call(message)
 
-    elif message_length < MAX_YES_MESSAGE_LENGTH:
-        return yes(message)
+    # elif message_length < MAX_YES_MESSAGE_LENGTH:
+    #     return yes(message)
 
 
 def repeat(message) -> str:
@@ -54,11 +54,11 @@ def call(message) -> str:
     return response
 
 
-def yes(message):
-    response = (
-        commands.yes.handle_is(message.text)
-        or commands.yes.handle_right(message.text)
-        or commands.yes.handle_can(message.text)
-    )
-    logger.debug(f"OH YES - {response}")
-    return response
+# def yes(message):
+#     response = (
+#         commands.yes.handle_is(message.text)
+#         or commands.yes.handle_right(message.text)
+#         or commands.yes.handle_can(message.text)
+#     )
+#     logger.debug(f"OH YES - {response}")
+#     return response
